@@ -14,92 +14,91 @@ export type Crudapp = {
   },
   "instructions": [
     {
-      "name": "close",
+      "name": "createTodo",
       "discriminator": [
-        98,
-        165,
-        201,
+        250,
+        161,
+        142,
+        148,
+        131,
+        48,
+        194,
+        181
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "todoEntry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "title"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "isDone",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "deleteTodo",
+      "discriminator": [
+        224,
+        212,
+        234,
         177,
-        108,
-        65,
-        206,
-        96
+        90,
+        57,
+        219,
+        115
       ],
       "accounts": [
         {
-          "name": "payer",
-          "writable": true,
+          "name": "user",
           "signer": true
         },
         {
-          "name": "crudapp",
-          "writable": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "decrement",
-      "discriminator": [
-        106,
-        227,
-        168,
-        59,
-        248,
-        27,
-        150,
-        101
-      ],
-      "accounts": [
-        {
-          "name": "crudapp",
-          "writable": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "increment",
-      "discriminator": [
-        11,
-        18,
-        104,
-        9,
-        104,
-        174,
-        59,
-        33
-      ],
-      "accounts": [
-        {
-          "name": "crudapp",
-          "writable": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "initialize",
-      "discriminator": [
-        175,
-        175,
-        109,
-        31,
-        13,
-        152,
-        155,
-        237
-      ],
-      "accounts": [
-        {
-          "name": "payer",
+          "name": "todoDelete",
           "writable": true,
-          "signer": true
-        },
-        {
-          "name": "crudapp",
-          "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "title"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
         },
         {
           "name": "systemProgram",
@@ -109,55 +108,96 @@ export type Crudapp = {
       "args": []
     },
     {
-      "name": "set",
+      "name": "updateTodo",
       "discriminator": [
-        198,
-        51,
-        53,
-        241,
-        116,
-        29,
-        126,
-        194
+        105,
+        8,
+        31,
+        183,
+        159,
+        73,
+        203,
+        134
       ],
       "accounts": [
         {
-          "name": "crudapp",
-          "writable": true
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "todoUpdate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "title"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "value",
-          "type": "u8"
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "isDone",
+          "type": "bool"
         }
       ]
     }
   ],
   "accounts": [
     {
-      "name": "crudapp",
+      "name": "todoEntry",
       "discriminator": [
-        255,
-        176,
-        4,
-        245,
-        188,
-        253,
+        97,
+        221,
+        222,
+        9,
         124,
-        25
+        204,
+        208,
+        45
       ]
     }
   ],
   "types": [
     {
-      "name": "crudapp",
+      "name": "todoEntry",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "count",
-            "type": "u8"
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "isDone",
+            "type": "bool"
           }
         ]
       }

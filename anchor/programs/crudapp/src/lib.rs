@@ -4,67 +4,105 @@ use anchor_lang::prelude::*;
 
 declare_id!("coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF");
 
+const ANCHOR_DISCRIMINANT_SIZE: usize = 8;
+
 #[program]
 pub mod crudapp {
     use super::*;
 
-  pub fn close(_ctx: Context<CloseCrudapp>) -> Result<()> {
-    Ok(())
-  }
+    pub fn create_todo(
+        ctx: Context<CreateTodo>,
+        title: String,
+        body: String,
+        is_done: bool
+    ) -> Result<()> {
+        let add_todo = &mut ctx.accounts.todo_entry;
+        add_todo.owner = ctx.accounts.user.key();
+        add_todo.title = title;
+        add_todo.body = body;
+        add_todo.is_done = is_done;
+        Ok(())
+    }
 
-  pub fn decrement(ctx: Context<Update>) -> Result<()> {
-    ctx.accounts.crudapp.count = ctx.accounts.crudapp.count.checked_sub(1).unwrap();
-    Ok(())
-  }
+    pub fn update_todo(
+        ctx: Context<UpdateTodo>,
+        _title: String,
+        body: String,
+        is_done: bool
+    ) -> Result<()> {
+        let update_todo = &mut ctx.accounts.todo_update;
+        update_todo.body = body;
+        update_todo.is_done = is_done;
+        Ok(())
+    }
 
-  pub fn increment(ctx: Context<Update>) -> Result<()> {
-    ctx.accounts.crudapp.count = ctx.accounts.crudapp.count.checked_add(1).unwrap();
-    Ok(())
-  }
-
-  pub fn initialize(_ctx: Context<InitializeCrudapp>) -> Result<()> {
-    Ok(())
-  }
-
-  pub fn set(ctx: Context<Update>, value: u8) -> Result<()> {
-    ctx.accounts.crudapp.count = value.clone();
-    Ok(())
-  }
-}
-
-#[derive(Accounts)]
-pub struct InitializeCrudapp<'info> {
-  #[account(mut)]
-  pub payer: Signer<'info>,
-
-  #[account(
-  init,
-  space = 8 + Crudapp::INIT_SPACE,
-  payer = payer
-  )]
-  pub crudapp: Account<'info, Crudapp>,
-  pub system_program: Program<'info, System>,
-}
-#[derive(Accounts)]
-pub struct CloseCrudapp<'info> {
-  #[account(mut)]
-  pub payer: Signer<'info>,
-
-  #[account(
-  mut,
-  close = payer, // close account and return lamports to payer
-  )]
-  pub crudapp: Account<'info, Crudapp>,
-}
-
-#[derive(Accounts)]
-pub struct Update<'info> {
-  #[account(mut)]
-  pub crudapp: Account<'info, Crudapp>,
+    pub fn delete_todo(_ctx: Context<DeleteTodo>) -> Result<()> {
+        Ok(())
+    }
 }
 
 #[account]
 #[derive(InitSpace)]
-pub struct Crudapp {
-  count: u8,
+pub struct TodoEntry { // struct for the input data
+    pub owner: Pubkey,
+
+    #[max_len(25)]
+    pub title: String,
+
+    #[max_len(50)]
+    pub body: String,
+
+    pub is_done: bool,
+}
+
+#[derive(Accounts)]
+#[instruction(title: String)]
+pub struct CreateTodo<'info> { // struct for the account creation
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    #[account(
+        init,
+        payer = user,
+        space = ANCHOR_DISCRIMINANT_SIZE + TodoEntry::INIT_SPACE,
+        seeds = [title.as_bytes(), user.key().as_ref()],
+        bump
+    )]
+    pub todo_entry: Account<'info, TodoEntry>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction(title:String)]
+pub struct UpdateTodo<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    #[account(
+        mut,
+        realloc = ANCHOR_DISCRIMINANT_SIZE + TodoEntry::INIT_SPACE,
+        realloc::payer = user, 
+        realloc::zero = true, // memory allocation need to be zeroed out because it is a modification account
+        seeds = [title.as_bytes(), user.key().as_ref()],
+        bump
+    )]
+    pub todo_update: Account<'info, TodoEntry>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction(title:String)]
+pub struct DeleteTodo<'info> {
+    pub user: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds=[title.as_bytes(),user.key().as_ref()],
+        bump,
+        close=user
+    )]
+    pub todo_delete: Account<'info, TodoEntry>,
+
+    pub system_program: Program<'info, System>,
 }
